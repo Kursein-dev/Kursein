@@ -1,14 +1,5 @@
 [
   {
-    "timestamp": "2025-11-11T22:53:57.652766",
-    "user_id": "1350672053979840522",
-    "user_name": "k1ll.mys3lf_16225",
-    "amount": 2166759299,
-    "reason": "Crash game win (cashed out at 2.16x)",
-    "balance_before": 12600,
-    "balance_after": 2166771899
-  },
-  {
     "timestamp": "2025-11-11T22:54:20.015997",
     "user_id": "1237598739041091652",
     "user_name": "memeanetor",
@@ -8998,5 +8989,14 @@
     "reason": "Crash game bet",
     "balance_before": 63750,
     "balance_after": 31875
+  },
+  {
+    "timestamp": "2025-12-01T19:57:11.805887",
+    "user_id": "343055455263916045",
+    "user_name": "kursein",
+    "amount": 10000,
+    "reason": "Monthly reward claim",
+    "balance_before": 31875,
+    "balance_after": 41875
   }
 ]
