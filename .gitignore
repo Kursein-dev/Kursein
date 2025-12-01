@@ -28,7 +28,6 @@ daily_quests.json
 prestige.json
 birthdays.json
 referrals.json
-ai_chat.json
 
 # Temporary/Development files
 *.backup

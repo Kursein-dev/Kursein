@@ -10,12 +10,8 @@ from typing import Optional, Union
 from dotenv import load_dotenv
 import aiohttp
 from urllib.parse import quote
-from openai import AsyncOpenAI
 
 load_dotenv()
-
-# Force reload environment variables after initial load
-os.environ.setdefault('OPENAI_API_KEY', os.getenv('OPENAI_API_KEY', ''))
 
 # Store reminders in memory (persisted to file)
 REMINDERS_FILE = "reminders.json"
@@ -57,23 +53,7 @@ DAILY_QUESTS_FILE = "daily_quests.json"
 PRESTIGE_FILE = "prestige.json"
 BIRTHDAYS_FILE = "birthdays.json"
 REFERRALS_FILE = "referrals.json"
-AI_CHAT_FILE = "ai_chat.json"
 DEFAULT_PREFIX = "~"
-
-# OpenAI Client (lazy init)
-openai_client = None
-
-def init_openai():
-    """Initialize OpenAI client if not already done"""
-    global openai_client
-    if openai_client is None:
-        api_key = os.getenv("OPENAI_API_KEY")
-        if api_key and api_key.strip():
-            try:
-                openai_client = AsyncOpenAI(api_key=api_key)
-            except Exception as e:
-                print(f"Failed to initialize OpenAI client: {e}")
-                openai_client = None
 
 DISBOARD_BOT_ID = 302050872383242240
 ERROR_CHANNEL_ID = 1435009092782522449  # Channel for error logging
@@ -106,7 +86,6 @@ daily_quests = {}  # user_id: {'quests': [{type, target, progress, reward}, ...]
 prestige_data = {}  # user_id: {'prestige_tier': int, 'total_resets': int, 'multiplier': float}
 user_birthdays = {}  # user_id: 'MM-DD'
 referral_data = {}  # user_id: {'referrer_id': int, 'referred_users': [int], 'bonus_earned': int}
-ai_conversations = {}  # user_id: [{'role': 'user'/'assistant', 'content': str}, ...]
 house_stats = {}  # {'total_wagered': int, 'total_paid': int, 'profit': int, 'tax_rate': float}
 player_loans = {}  # user_id: {'amount': int, 'interest_rate': float, 'due_date': timestamp}
 active_tournament = None  # Current weekly tournament data
@@ -2868,7 +2847,6 @@ async def on_ready():
     load_prestige_data()
     load_birthdays()
     load_referrals()
-    load_ai_conversations()
     
     # Backfill guild players for existing players
     print("Backfilling guild player data...")
@@ -6940,7 +6918,7 @@ class GuidePaginator(discord.ui.View):
         page5.set_footer(text="💡 Live stats powered by Tracker.gg API!")
         pages.append(page5)
         
-        # Page 6: New Systems (Quests, Prestige, Stats, Birthday, Referral, AI Chat)
+        # Page 6: New Systems (Quests, Prestige, Stats, Birthday, Referral)
         page6 = discord.Embed(
             title="📚 Command Guide - New Systems & Features",
             color=0x9b59b6
@@ -6963,15 +6941,6 @@ class GuidePaginator(discord.ui.View):
                 "`~refer use @user` - Use someone's code (+500 chips)\n"
                 "`~refer` - View referral stats\n\n"
                 "💡 **Invite friends and earn bonuses!**"
-            ),
-            inline=False
-        )
-        page6.add_field(
-            name="🤖 AI Chat with Personality",
-            value=(
-                "`~chat <message>` - Talk to GPT-4o AI\n"
-                "`~clearai` - Reset conversation history\n\n"
-                "💡 **The bot has attitude! Sarcastic & witty responses about casino life.**"
             ),
             inline=False
         )
@@ -7315,25 +7284,6 @@ def save_referrals():
             json.dump(referral_data, f, indent=2)
     except Exception as e:
         print(f"Error saving referrals: {e}")
-
-def load_ai_conversations():
-    """Load AI conversation history from file"""
-    global ai_conversations
-    try:
-        if os.path.exists(AI_CHAT_FILE):
-            with open(AI_CHAT_FILE, 'r') as f:
-                ai_conversations = json.load(f)
-    except Exception as e:
-        print(f"Error loading AI conversations: {e}")
-        ai_conversations = {}
-
-def save_ai_conversations():
-    """Save AI conversation history to file"""
-    try:
-        with open(AI_CHAT_FILE, 'w') as f:
-            json.dump(ai_conversations, f, indent=2)
-    except Exception as e:
-        print(f"Error saving AI conversations: {e}")
 
 class StaffPaginator(discord.ui.View):
     """Interactive paginated staff directory"""
@@ -14218,100 +14168,6 @@ async def refer_command(ctx, action: Optional[str] = None, user: Optional[discor
         embed.add_field(name="Get Started", value="`~refer link` - Get your referral code\n`~refer use @user` - Use someone's referral code", inline=False)
         
         await ctx.send(embed=embed)
-
-@bot.command(name='chat')
-async def chat_command(ctx, *, message=None):
-    """Chat with AI (GPT-4o) - The bot has attitude!"""
-    if not message:
-        return await ctx.send("❌ Use `~chat <your message>`")
-    
-    init_openai()
-    
-    if openai_client is None:
-        api_key = os.getenv("OPENAI_API_KEY")
-        if not api_key or not api_key.strip():
-            return await ctx.send("❌ **OpenAI API key not configured.** Admin: Set OPENAI_API_KEY in secrets")
-        else:
-            return await ctx.send("❌ **OpenAI Error:** Failed to initialize client. Check your API key is valid.")
-    
-    user_id = str(ctx.author.id)
-    
-    try:
-        # Initialize conversation if needed
-        if user_id not in ai_conversations:
-            ai_conversations[user_id] = []
-        
-        # System prompt for personality
-        system_prompt = """You are a sarcastic, witty Discord bot in a casino server. You:
-- Have a cheeky personality with sarcasm and dark humor
-- Make casino/gambling jokes and references
-- Are confident and cocky about your knowledge
-- Use Discord-appropriate language and emojis
-- Keep responses concise (2-3 sentences usually)
-- Sometimes roast users playfully but never mean-spirited
-- Reference chips, losses, wins, and gambling terminology when relevant
-Example: "Oh great, another player who thinks they can beat the house. Spoiler: you can't. But good luck, I believe in you! 😏🎰"
-Keep responses brief and punchy."""
-        
-        # Add user message to history
-        ai_conversations[user_id].append({
-            "role": "user",
-            "content": message
-        })
-        
-        # Keep last 20 messages for context (not 10)
-        if len(ai_conversations[user_id]) > 20:
-            ai_conversations[user_id] = ai_conversations[user_id][-20:]
-        
-        # Get AI response
-        async with ctx.typing():
-            response = await openai_client.chat.completions.create(
-                model="gpt-4o",
-                messages=[{"role": "system", "content": system_prompt}] + ai_conversations[user_id],
-                max_tokens=500,
-                temperature=0.8
-            )
-        
-        ai_message = response.choices[0].message.content
-        if ai_message is None:
-            ai_message = "Uh... lost my train of thought there. What were we talking about?"
-        
-        # Add response to history
-        ai_conversations[user_id].append({
-            "role": "assistant",
-            "content": ai_message
-        })
-        
-        save_ai_conversations()
-        
-        # Split long responses into chunks
-        if len(ai_message) > 2000:
-            chunks = [ai_message[i:i+2000] for i in range(0, len(ai_message), 2000)]
-            for chunk in chunks:
-                await ctx.send(chunk)
-        else:
-            await ctx.send(ai_message)
-    
-    except Exception as e:
-        error_str = str(e)[:100] if str(e) else "Unknown error"
-        await ctx.send(f"❌ AI Error: {error_str}")
-
-@bot.command(name='clearai')
-async def clearai_command(ctx):
-    """Clear your AI chat history"""
-    user_id = str(ctx.author.id)
-    
-    if user_id in ai_conversations:
-        ai_conversations[user_id] = []
-        save_ai_conversations()
-        embed = discord.Embed(
-            title="✅ Chat History Cleared",
-            description="Your conversation with AI has been reset",
-            color=0x00FF00
-        )
-        await ctx.send(embed=embed)
-    else:
-        await ctx.send("❌ No chat history to clear")
 
 @bot.event
 async def on_command_error(ctx, error):
