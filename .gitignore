@@ -1,7 +1,7 @@
+# Environment
 .env
-reminders.json
-prefixes.json
-bump_config.json
+
+# Python
 __pycache__/
 *.pyc
 *.pyo
@@ -11,4 +11,26 @@ __pycache__/
 .cache/
 .local/
 .upm/
+
+# Package lock
 uv.lock
+
+# Replit
+.replit
+
+# User data files (created at runtime)
+reminders.json
+prefixes.json
+bump_config.json
+chips_log.json
+game_history.json
+daily_quests.json
+prestige.json
+birthdays.json
+referrals.json
+ai_chat.json
+
+# Temporary/Development files
+*.backup
+attached_assets/
+*.log
