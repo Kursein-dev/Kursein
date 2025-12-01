@@ -780,13 +780,24 @@ def load_reminders():
         if os.path.exists(REMINDERS_FILE):
             with open(REMINDERS_FILE, 'r') as f:
                 reminders = json.load(f)
+    except json.JSONDecodeError as e:
+        print(f"Error: reminders.json is corrupted, resetting: {e}")
+        reminders = []
+        save_reminders()
     except Exception as e:
         print(f"Error loading reminders: {e}")
         reminders = []
 
 def save_reminders():
-    """Save reminders to file"""
+    """Save reminders to file (auto-cleans old completed entries)"""
+    global reminders
     try:
+        # Clean up old completed reminders (keep only pending ones and last 10 completed)
+        pending = [r for r in reminders if not r.get("completed", False)]
+        completed = [r for r in reminders if r.get("completed", False)]
+        # Keep only last 10 completed reminders for history
+        reminders = pending + completed[-10:]
+        
         with open(REMINDERS_FILE, 'w') as f:
             json.dump(reminders, f, indent=2)
     except Exception as e:
@@ -5215,7 +5226,6 @@ def add_chips(user_id, amount, user_name="Unknown", reason="Unknown"):
     old_balance = get_chips(user_id)
     player_chips[user_id] = old_balance + amount
     new_balance = player_chips[user_id]
-    print(f"[CHIP DEBUG] User {user_id}: Added {amount} chips. {old_balance} -> {new_balance}")
     log_chip_transaction(user_id, user_name, amount, reason, old_balance, new_balance)
     save_chips()  # Persist chips to file
     return new_balance
@@ -5229,7 +5239,6 @@ def remove_chips(user_id, amount, user_name="Unknown", reason="Unknown"):
     old_balance = get_chips(user_id)
     player_chips[user_id] = old_balance - amount
     new_balance = player_chips[user_id]
-    print(f"[CHIP DEBUG] User {user_id}: Removed {amount} chips. {old_balance} -> {new_balance}")
     log_chip_transaction(user_id, user_name, -amount, reason, old_balance, new_balance)
     save_chips()  # Persist chips to file
     return new_balance
@@ -5239,7 +5248,6 @@ def set_chips(user_id, amount, user_name="Unknown", reason="Unknown"):
     old_balance = get_chips(user_id) if user_id in player_chips else 0
     player_chips[user_id] = amount
     new_balance = player_chips[user_id]
-    print(f"[CHIP DEBUG] User {user_id}: Set to {amount} chips. {old_balance} -> {new_balance}")
     log_chip_transaction(user_id, user_name, amount - old_balance, reason, old_balance, new_balance)
     save_chips()  # Persist chips to file
     return new_balance
