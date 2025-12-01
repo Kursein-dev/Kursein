@@ -3330,7 +3330,7 @@ class CommandsPaginator(discord.ui.View):
             except discord.HTTPException:
                 pass
 
-@bot.command(name='ping')
+@bot.hybrid_command(name='ping')
 async def ping_command(ctx):
     """Check the bot's response time and latency"""
     # Calculate message latency
@@ -3368,7 +3368,7 @@ async def ping_command(ctx):
     
     await message.edit(content=None, embed=embed)
 
-@bot.command(name='id')
+@bot.hybrid_command(name='id')
 async def emoji_id_command(ctx, *, emoji_input: Optional[str] = None):
     """Get the ID and format of a custom emoji
     
@@ -3436,7 +3436,7 @@ async def emoji_id_command(ctx, *, emoji_input: Optional[str] = None):
             await ctx.send("❌ Could not find emoji information. Make sure to:\n• Use the actual emoji in your message\n• Use the emoji name with colons (e.g., `:Casino_Chip:`)\n• Ensure the emoji is from this server")
 
 
-@bot.command(name='viptiers', aliases=['tiers'])
+@bot.hybrid_command(name='viptiers', aliases=['tiers'])
 async def vip_tiers_command(ctx):
     """View all VIP tiers and their benefits"""
     prefix = get_prefix(bot, ctx.message)
@@ -3542,7 +3542,7 @@ async def vip_tiers_command(ctx):
     
     await ctx.send(embed=embed)
 
-@bot.command(name='gameinfo', aliases=['games'])
+@bot.hybrid_command(name='gameinfo', aliases=['games'])
 async def prefix_gameinfo(ctx):
     """Show detailed information about all casino games"""
     prefix = get_prefix(bot, ctx.message)
@@ -3770,7 +3770,7 @@ async def prefix_gameinfo(ctx):
     view = CommandsPaginator(ctx, pages)
     view.message = await ctx.send(embed=pages[0], view=view)
 
-@bot.command(name='slots')
+@bot.hybrid_command(name='slots')
 async def prefix_slots(ctx, bet_input: str = "10"):
     """Spin the slot machine! (prefix version)
     
@@ -3936,7 +3936,7 @@ async def prefix_slots(ctx, bet_input: str = "10"):
     # Check for challenge completions
     await check_challenge_completion(ctx, user_id)
 
-@bot.command(name='roll')
+@bot.hybrid_command(name='roll')
 async def prefix_roll(ctx, dice: str = "1d6"):
     """Roll dice! (prefix version)
     
@@ -3985,7 +3985,7 @@ async def prefix_roll(ctx, dice: str = "1d6"):
     except ValueError:
         await ctx.send("❌ Invalid dice format! Use format like `1d6`, `2d20`, etc.")
 
-@bot.command(name='8ball')
+@bot.hybrid_command(name='8ball')
 async def prefix_8ball(ctx, *, question: Optional[str] = None):
     """Ask the magic 8-ball a question! (prefix version)"""
     if not question:
@@ -4436,7 +4436,7 @@ class CrashGameView(discord.ui.View):
         """Called when the view times out"""
         active_games.discard(self.user_id)
 
-@bot.command(name='crash')
+@bot.hybrid_command(name='crash')
 async def crash_game(ctx, bet: str):
     """Play Crash - Cash out before the multiplier crashes!
     
@@ -4893,7 +4893,7 @@ class MinesGameView(discord.ui.View):
         """Called when the view times out"""
         active_games.discard(self.user_id)
 
-@bot.command(name='mines')
+@bot.hybrid_command(name='mines')
 async def mines_game(ctx, bet: str, mines: int = 3):
     """Play Mines - Reveal tiles and avoid bombs!
     
@@ -4961,7 +4961,7 @@ async def mines_game(ctx, bet: str, mines: int = 3):
     
     await ctx.send(embed=embed, view=view)
 
-@bot.command(name='wheel')
+@bot.hybrid_command(name='wheel')
 async def wheel_game(ctx, bet: str):
     """Spin the Prize Wheel!
     
@@ -5123,7 +5123,7 @@ async def wheel_game(ctx, bet: str):
     # Remove from active games
     active_games.discard(user_id)
 
-@bot.command(name='craps')
+@bot.hybrid_command(name='craps')
 async def craps_game(ctx, bet: str):
     """Play Craps - Interactive dice casino game!
     
@@ -5421,7 +5421,7 @@ async def play_solo_blackjack(ctx, user_id, bet):
     
     await ctx.send(embed=result_embed)
 
-@bot.command(name='verify')
+@bot.hybrid_command(name='verify')
 async def prefix_verify(ctx):
     """Verify yourself to play casino games (one-time)"""
     user_id = ctx.author.id
@@ -5451,7 +5451,7 @@ async def prefix_verify(ctx):
     embed.set_footer(text="This verification is permanent • Enjoy playing!")
     await ctx.send(embed=embed)
 
-@bot.command(name='verifyuser')
+@bot.hybrid_command(name='verifyuser')
 @commands.has_permissions(administrator=True)
 async def prefix_verifyuser(ctx, user: discord.User):
     """Manually verify a user (Admin only)"""
@@ -5467,7 +5467,7 @@ async def prefix_verifyuser(ctx, user: discord.User):
     )
     await ctx.send(embed=embed)
 
-@bot.command(name='unverify')
+@bot.hybrid_command(name='unverify')
 @commands.has_permissions(administrator=True)
 async def prefix_unverify(ctx, user: discord.User):
     """Remove verification from a user (Admin only)"""
@@ -5483,7 +5483,7 @@ async def prefix_unverify(ctx, user: discord.User):
     )
     await ctx.send(embed=embed)
 
-@bot.command(name='balance', aliases=['bal'])
+@bot.hybrid_command(name='balance', aliases=['bal'])
 async def prefix_balance(ctx, user: Optional[discord.User] = None):
     """Check chip balance for yourself or another user"""
     target_user = user if user is not None else ctx.author
@@ -5506,7 +5506,7 @@ async def prefix_balance(ctx, user: Optional[discord.User] = None):
     embed.set_footer(text="💡 Trade chips for tickets using ~buytickets")
     await ctx.send(embed=embed)
 
-@bot.command(name='bank')
+@bot.hybrid_command(name='bank')
 async def bank_command(ctx, user: Optional[discord.User] = None):
     """Check your bank balance (safe from robberies)
     
@@ -5536,7 +5536,7 @@ async def bank_command(ctx, user: Optional[discord.User] = None):
     
     await ctx.send(embed=embed)
 
-@bot.command(name='deposit', aliases=['dep'])
+@bot.hybrid_command(name='deposit', aliases=['dep'])
 async def deposit_command(ctx, amount: str):
     """Deposit chips into your safe bank account
     
@@ -5586,7 +5586,7 @@ async def deposit_command(ctx, amount: str):
     
     await ctx.send(embed=embed)
 
-@bot.command(name='withdraw', aliases=['with'])
+@bot.hybrid_command(name='withdraw', aliases=['with'])
 async def withdraw_command(ctx, amount: str):
     """Withdraw chips from your bank to your wallet
     
@@ -5633,7 +5633,7 @@ async def withdraw_command(ctx, amount: str):
     
     await ctx.send(embed=embed)
 
-@bot.command(name='buytickets', aliases=['buyticket', 'tickets'])
+@bot.hybrid_command(name='buytickets', aliases=['buyticket', 'tickets'])
 async def buytickets_command(ctx, amount: int = 1):
     """Trade chips for tickets (100,000 chips = 1 ticket)
     
@@ -5694,7 +5694,7 @@ async def buytickets_command(ctx, amount: int = 1):
     embed.set_footer(text=f"Rate: {TICKET_COST:,} chips = 1 ticket")
     await ctx.send(embed=embed)
 
-@bot.command(name='leaderboard', aliases=['lb', 'top'])
+@bot.hybrid_command(name='leaderboard', aliases=['lb', 'top'])
 async def prefix_leaderboard(ctx, limit: int = 10):
     """Show the top players by chip count (server only - verified users)
     
@@ -5783,7 +5783,7 @@ async def prefix_leaderboard(ctx, limit: int = 10):
     
     await ctx.send(embed=embed)
 
-@bot.command(name='setrank', aliases=['rlrank'])
+@bot.hybrid_command(name='setrank', aliases=['rlrank'])
 async def set_rl_rank(ctx, *, rank_name: Optional[str] = None):
     """Set your Rocket League rank
     
@@ -5863,7 +5863,7 @@ async def set_rl_rank(ctx, *, rank_name: Optional[str] = None):
     )
     await ctx.send(embed=embed)
 
-@bot.command(name='rllb', aliases=['rlleaderboard', 'rocketleagueleaderboard'])
+@bot.hybrid_command(name='rllb', aliases=['rlleaderboard', 'rocketleagueleaderboard'])
 async def rl_leaderboard(ctx, limit: int = 10):
     """Show the Rocket League rank leaderboard (server only)
     
@@ -5944,7 +5944,7 @@ async def rl_leaderboard(ctx, limit: int = 10):
     
     await ctx.send(embed=embed)
 
-@bot.command(name='setrlprofile', aliases=['linkrl', 'rluser'])
+@bot.hybrid_command(name='setrlprofile', aliases=['linkrl', 'rluser'])
 async def set_rl_profile(ctx, platform: Optional[str] = None, *, username: Optional[str] = None):
     """Link your Rocket League Tracker.gg profile
     
@@ -5997,7 +5997,7 @@ async def set_rl_profile(ctx, platform: Optional[str] = None, *, username: Optio
     
     await ctx.send(embed=embed)
 
-@bot.command(name='rlstats', aliases=['rlprofile', 'rltracker'])
+@bot.hybrid_command(name='rlstats', aliases=['rlprofile', 'rltracker'])
 async def rl_stats(ctx, member: Optional[discord.Member] = None):
     """View a player's live Rocket League stats from Tracker.gg
     
@@ -6159,7 +6159,7 @@ async def rl_stats(ctx, member: Optional[discord.Member] = None):
         embed.add_field(name="📊 View Profile", value=f"[Open Tracker.gg]({tracker_url})", inline=False)
         await loading_msg.edit(content=None, embed=embed)
 
-@bot.command(name='createclan', aliases=['newclan'])
+@bot.hybrid_command(name='createclan', aliases=['newclan'])
 async def create_clan_command(ctx, *, clan_name: str):
     """Create a new clan/mafia (costs 50,000 chips)
     
@@ -6229,7 +6229,7 @@ async def create_clan_command(ctx, *, clan_name: str):
     
     await ctx.send(embed=embed)
 
-@bot.command(name='clan', aliases=['claninfo'])
+@bot.hybrid_command(name='clan', aliases=['claninfo'])
 async def clan_info_command(ctx):
     """View your clan's information
     
@@ -6284,7 +6284,7 @@ async def clan_info_command(ctx):
     
     await ctx.send(embed=embed)
 
-@bot.command(name='claninvite')
+@bot.hybrid_command(name='claninvite')
 async def clan_invite_command(ctx, member: discord.Member):
     """Invite a user to your clan (Leader/Officers only)
     
@@ -6336,7 +6336,7 @@ async def clan_invite_command(ctx, member: discord.Member):
     except discord.Forbidden:
         await ctx.send(f"❌ Couldn't send DM to {member.name}. They need to enable DMs or use `~clanjoin {clan_data['name']}`.")
 
-@bot.command(name='clanjoin')
+@bot.hybrid_command(name='clanjoin')
 async def clan_join_command(ctx, *, clan_name: str):
     """Join a clan by name
     
@@ -6380,7 +6380,7 @@ async def clan_join_command(ctx, *, clan_name: str):
     
     await ctx.send(embed=embed)
 
-@bot.command(name='clanleave')
+@bot.hybrid_command(name='clanleave')
 async def clan_leave_command(ctx):
     """Leave your current clan
     
@@ -6423,7 +6423,7 @@ async def clan_leave_command(ctx):
     
     await ctx.send(f"👋 You left **{clan_data['name']}**.")
 
-@bot.command(name='clankick')
+@bot.hybrid_command(name='clankick')
 async def clan_kick_command(ctx, member: discord.Member):
     """Kick a member from your clan (Leader only)
     
@@ -6469,7 +6469,7 @@ async def clan_kick_command(ctx, member: discord.Member):
     
     await ctx.send(f"👢 Kicked **{member.name}** from **{clan_data['name']}**.")
 
-@bot.command(name='clandeposit', aliases=['clandep'])
+@bot.hybrid_command(name='clandeposit', aliases=['clandep'])
 async def clan_deposit_command(ctx, amount: str):
     """Deposit chips into your clan's vault
     
@@ -6521,7 +6521,7 @@ async def clan_deposit_command(ctx, amount: str):
     
     await ctx.send(embed=embed)
 
-@bot.command(name='clanwithdraw', aliases=['clanwith'])
+@bot.hybrid_command(name='clanwithdraw', aliases=['clanwith'])
 async def clan_withdraw_command(ctx, amount: str):
     """Withdraw chips from clan vault (Leader/Officers only)
     
@@ -6577,7 +6577,7 @@ async def clan_withdraw_command(ctx, amount: str):
     
     await ctx.send(embed=embed)
 
-@bot.command(name='clans', aliases=['clanlist'])
+@bot.hybrid_command(name='clans', aliases=['clanlist'])
 async def clans_list_command(ctx):
     """View all clans
     
@@ -6608,7 +6608,7 @@ async def clans_list_command(ctx):
     
     await ctx.send(embed=embed)
 
-@bot.command(name='clanleaderboard', aliases=['clanlb'])
+@bot.hybrid_command(name='clanleaderboard', aliases=['clanlb'])
 async def clan_leaderboard_command(ctx, limit: int = 10):
     """View top clans by vault
     
@@ -6653,7 +6653,7 @@ async def clan_leaderboard_command(ctx, limit: int = 10):
     
     await ctx.send(embed=embed)
 
-@bot.command(name='challenges')
+@bot.hybrid_command(name='challenges')
 async def prefix_challenges(ctx):
     """View all challenges and your progress"""
     user_id = str(ctx.author.id)
@@ -7041,7 +7041,7 @@ class GuidePaginator(discord.ui.View):
             except discord.HTTPException:
                 pass
 
-@bot.command(name='guide')
+@bot.hybrid_command(name='guide')
 async def guide_command(ctx):
     """Complete interactive guide of all bot commands with pagination
     
@@ -7367,7 +7367,7 @@ class StaffPaginator(discord.ui.View):
             except discord.HTTPException:
                 pass
 
-@bot.command(name='staff')
+@bot.hybrid_command(name='staff')
 async def staff_command(ctx):
     """View the server staff directory with pagination
     
@@ -7378,7 +7378,7 @@ async def staff_command(ctx):
     message = await ctx.send(embed=view.pages[0], view=view)
     view.message = message
 
-@bot.command(name='staffedit')
+@bot.hybrid_command(name='staffedit')
 async def staffedit_command(ctx, *, new_description: Optional[str] = None):
     """Edit your own staff profile (Staff only)
     
@@ -7620,7 +7620,7 @@ class ShopPaginator(discord.ui.View):
             except discord.HTTPException:
                 pass
 
-@bot.command(name='inventory', aliases=['inv'])
+@bot.hybrid_command(name='inventory', aliases=['inv'])
 async def inventory_command(ctx, user: Optional[discord.User] = None):
     """View your inventory and active boosts
     
@@ -7734,7 +7734,7 @@ async def inventory_command(ctx, user: Optional[discord.User] = None):
     
     await ctx.send(embed=embed)
 
-@bot.command(name='rollpet', aliases=['petroll'])
+@bot.hybrid_command(name='rollpet', aliases=['petroll'])
 async def rollpet_command(ctx):
     """Roll for a random pet using tickets
     
@@ -7798,7 +7798,7 @@ async def rollpet_command(ctx):
     
     await ctx.send(embed=embed)
 
-@bot.command(name='pets', aliases=['collection', 'mypets'])
+@bot.hybrid_command(name='pets', aliases=['collection', 'mypets'])
 async def pets_command(ctx, user: Optional[discord.User] = None):
     """View your pet collection
     
@@ -7879,7 +7879,7 @@ async def pets_command(ctx, user: Optional[discord.User] = None):
     
     await ctx.send(embed=embed)
 
-@bot.command(name='setbanner', aliases=['banner'])
+@bot.hybrid_command(name='setbanner', aliases=['banner'])
 async def setbanner_command(ctx, *, image_url: str):
     """Set a custom banner image for your profile
     
@@ -7907,7 +7907,7 @@ async def setbanner_command(ctx, *, image_url: str):
     
     await ctx.send(embed=embed)
 
-@bot.command(name='removebanner', aliases=['deletebanner', 'clearbanner'])
+@bot.hybrid_command(name='removebanner', aliases=['deletebanner', 'clearbanner'])
 async def removebanner_command(ctx):
     """Remove your profile banner
     
@@ -7930,7 +7930,7 @@ async def removebanner_command(ctx):
     
     await ctx.send(embed=embed)
 
-@bot.command(name='setidol', aliases=['idol'])
+@bot.hybrid_command(name='setidol', aliases=['idol'])
 async def setidol_command(ctx, *, pet_name: str):
     """Set a pet as your profile idol (shown in trades and profiles)
     
@@ -7979,7 +7979,7 @@ async def setidol_command(ctx, *, pet_name: str):
     
     await ctx.send(embed=embed)
 
-@bot.command(name='profile', aliases=['stats', 'rank'])
+@bot.hybrid_command(name='profile', aliases=['stats', 'rank'])
 async def profile_command(ctx, user: Optional[discord.User] = None):
     """View player profile with XP, level, VIP tier, and stats
     
@@ -8111,7 +8111,7 @@ async def profile_command(ctx, user: Optional[discord.User] = None):
     
     await ctx.send(embed=embed)
 
-@bot.command(name='streak', aliases=['login'])
+@bot.hybrid_command(name='streak', aliases=['login'])
 async def streak_command(ctx):
     """View your daily login streak and rewards
     
@@ -8284,7 +8284,7 @@ class GameHistoryPaginator(discord.ui.View):
         self.update_buttons()
         await interaction.response.edit_message(embed=self.pages[self.current_page], view=self)
 
-@bot.command(name='history', aliases=['hist'])
+@bot.hybrid_command(name='history', aliases=['hist'])
 async def history_command(ctx, user: Optional[discord.User] = None):
     """View your game history with results
     
@@ -8309,7 +8309,7 @@ async def history_command(ctx, user: Optional[discord.User] = None):
     message = await ctx.send(embed=view.pages[0], view=view)
     view.message = message
 
-@bot.command(name='admin', aliases=['adminboard', 'botadmin'])
+@bot.hybrid_command(name='admin', aliases=['adminboard', 'botadmin'])
 async def admin_command(ctx):
     """View bot economy analytics (Owner only)
     
@@ -8418,7 +8418,7 @@ async def admin_command(ctx):
     
     await ctx.send(embed=embed)
 
-@bot.command(name='achievements', aliases=['ach'])
+@bot.hybrid_command(name='achievements', aliases=['ach'])
 async def achievements_command(ctx):
     """View all unlocked achievements and rewards
     
@@ -8478,7 +8478,7 @@ async def achievements_command(ctx):
     
     await ctx.send(embed=embed)
 
-@bot.command(name='jackpot', aliases=['jp'])
+@bot.hybrid_command(name='jackpot', aliases=['jp'])
 async def jackpot_command(ctx):
     """Check the progressive jackpot pool
     
@@ -8493,7 +8493,7 @@ async def jackpot_command(ctx):
     
     await ctx.send(embed=embed)
 
-@bot.command(name='loan')
+@bot.hybrid_command(name='loan')
 async def loan_command(ctx, amount: int = 1000):
     """Take a loan when you're broke (100% interest - repay DOUBLE, 7 days)
     
@@ -8549,7 +8549,7 @@ async def loan_command(ctx, amount: int = 1000):
     
     await ctx.send(embed=embed)
 
-@bot.command(name='repay')
+@bot.hybrid_command(name='repay')
 async def repay_command(ctx):
     """Repay your active loan
     
@@ -8589,7 +8589,7 @@ async def repay_command(ctx):
     
     await ctx.send(embed=embed)
 
-@bot.command(name='shop', aliases=['store'])
+@bot.hybrid_command(name='shop', aliases=['store'])
 async def shop_command(ctx):
     """Browse and buy items, boosts, and perks with interactive buttons
     
@@ -8608,7 +8608,7 @@ async def shop_command(ctx):
     message = await ctx.send(embed=view.create_embed(), view=view)
     view.message = message
 
-@bot.command(name='use', aliases=['activate'])
+@bot.hybrid_command(name='use', aliases=['activate'])
 async def use_item_command(ctx, item_id: str):
     """Use/activate an item from your inventory
     
@@ -8704,7 +8704,7 @@ async def use_item_command(ctx, item_id: str):
     else:
         await ctx.send("❌ This item cannot be activated. It may be a permanent perk!")
 
-@bot.command(name='tournament', aliases=['tourney'])
+@bot.hybrid_command(name='tournament', aliases=['tourney'])
 async def tournament_command(ctx, action: Optional[str] = None):
     """View or join active tournament
     
@@ -8765,7 +8765,7 @@ async def tournament_command(ctx, action: Optional[str] = None):
     
     await ctx.send(embed=embed)
 
-@bot.command(name='daily')
+@bot.hybrid_command(name='daily')
 async def prefix_daily(ctx):
     """Claim your daily chip reward (100 chips every 12 hours + VIP bonus)"""
     user_id = str(ctx.author.id)
@@ -8850,7 +8850,7 @@ async def prefix_daily(ctx):
     # Check for challenge completions
     await check_challenge_completion(ctx, user_id)
 
-@bot.command(name='weekly')
+@bot.hybrid_command(name='weekly')
 async def prefix_weekly(ctx):
     """Claim your weekly chip reward (750 chips every 168 hours)"""
     user_id = str(ctx.author.id)
@@ -8932,7 +8932,7 @@ async def prefix_weekly(ctx):
     # Check for challenge completions
     await check_challenge_completion(ctx, user_id)
 
-@bot.command(name='monthly')
+@bot.hybrid_command(name='monthly')
 async def prefix_monthly(ctx):
     """Claim your monthly chip reward (3000 chips at the start of each calendar month)"""
     user_id = str(ctx.author.id)
@@ -9019,7 +9019,7 @@ async def prefix_monthly(ctx):
     # Check for challenge completions
     await check_challenge_completion(ctx, user_id)
 
-@bot.command(name='yearly')
+@bot.hybrid_command(name='yearly')
 async def prefix_yearly(ctx):
     """Claim your yearly chip reward (100,000 chips every 365 days)"""
     user_id = str(ctx.author.id)
@@ -9101,7 +9101,7 @@ async def prefix_yearly(ctx):
     # Check for challenge completions
     await check_challenge_completion(ctx, user_id)
 
-@bot.command(name='monthlyrewards')
+@bot.hybrid_command(name='monthlyrewards')
 async def monthly_rewards(ctx):
     """Check your monthly reward progress and claim tier rewards
     
@@ -9631,7 +9631,7 @@ class TradeRequestView(discord.ui.View):
             except Exception:
                 pass
 
-@bot.command(name='mt')
+@bot.hybrid_command(name='mt')
 async def multi_trade(ctx, member: discord.Member):
     """Send a trade request to another player
     
@@ -9707,7 +9707,7 @@ async def set_trade_offer(user_id, channel, amount_str):
     await trade_view.update_embed()
     return True
 
-@bot.command(name='rob')
+@bot.hybrid_command(name='rob')
 async def rob_player(ctx, member: discord.Member):
     """Attempt to rob another player's chips (1% success rate, 1 hour cooldown)
     
@@ -9824,7 +9824,7 @@ async def rob_player(ctx, member: discord.Member):
     result_embed.set_footer(text=f"Current success rate: {rob_success_rate}% | 1 hour cooldown")
     await message.edit(embed=result_embed)
 
-@bot.command(name='selectjob', aliases=['choosejob', 'jobselect'])
+@bot.hybrid_command(name='selectjob', aliases=['choosejob', 'jobselect'])
 async def select_job_command(ctx, *, job_name: Optional[str] = None):
     """Select a job to work (unlocks at higher levels)
     
@@ -9904,7 +9904,7 @@ async def select_job_command(ctx, *, job_name: Optional[str] = None):
     embed.set_footer(text="Use ~work to start your shift! • 2 hour cooldown")
     await ctx.send(embed=embed)
 
-@bot.command(name='job', aliases=['jobs'])
+@bot.hybrid_command(name='job', aliases=['jobs'])
 async def job_list(ctx):
     """View all available jobs with level requirements and pay rates
     
@@ -9970,7 +9970,7 @@ async def job_list(ctx):
     
     await ctx.send(embed=embed)
 
-@bot.command(name='work')
+@bot.hybrid_command(name='work')
 async def work_job(ctx):
     """Work a job to earn chips! (2-hour cooldown)
     
@@ -10054,7 +10054,7 @@ async def work_job(ctx):
     
     await message.edit(embed=result_embed)
 
-@bot.command(name='bounty')
+@bot.hybrid_command(name='bounty')
 async def place_bounty(ctx, member: discord.Member, amount: int):
     """Place a bounty on another player's head!
     
@@ -10122,7 +10122,7 @@ async def place_bounty(ctx, member: discord.Member, amount: int):
     
     await ctx.send(embed=embed)
 
-@bot.command(name='bounties')
+@bot.hybrid_command(name='bounties')
 async def view_bounties(ctx):
     """View all active bounties
     
@@ -10159,7 +10159,7 @@ async def view_bounties(ctx):
     
     await ctx.send(embed=embed)
 
-@bot.command(name='claim')
+@bot.hybrid_command(name='claim')
 async def claim_bounty(ctx, member: discord.Member):
     """Attempt to claim a bounty on someone!
     
@@ -10302,7 +10302,7 @@ class SportsBet:
     def get_total_pot(self):
         return self.team1_pot + self.team2_pot
 
-@bot.command(name='sportsbet')
+@bot.hybrid_command(name='sportsbet')
 async def sports_bet(ctx, action: Optional[str] = None, *args):
     """Sports betting system for Rocket League and other games
     
@@ -10672,7 +10672,7 @@ class MultiplayerRouletteGame:
     def get_player_count(self):
         return len(self.bets)
 
-@bot.command(name='coinflip')
+@bot.hybrid_command(name='coinflip')
 async def prefix_coinflip(ctx, action: Optional[str] = None, bet_input: Optional[str] = None):
     """Flip a coin - challenge another player or flip solo!
     
@@ -10861,7 +10861,7 @@ async def prefix_coinflip(ctx, action: Optional[str] = None, bet_input: Optional
     # Check for challenge completion (solo mode)
     await check_challenge_completion(ctx, ctx.author.id)
 
-@bot.command(name='blackjack')
+@bot.hybrid_command(name='blackjack')
 async def prefix_blackjack(ctx, action: Optional[str] = None, bet: Optional[str] = None):
     """Play blackjack! 
     
@@ -11160,7 +11160,7 @@ async def finish_blackjack_game(ctx, game):
     # Clean up game
     del active_blackjack_games[ctx.channel.id]
 
-@bot.command(name='roulette')
+@bot.hybrid_command(name='roulette')
 async def prefix_roulette(ctx, bet_input: Optional[str] = None, *, bet_type: Optional[str] = None):
     """Play roulette! (Solo or multiplayer - everyone can bet on the same spin)
     
@@ -11335,7 +11335,7 @@ async def prefix_roulette(ctx, bet_input: Optional[str] = None, *, bet_type: Opt
     # Check for challenge completion
     await check_challenge_completion(ctx, user_id)
 
-@bot.command(name='hilo')
+@bot.hybrid_command(name='hilo')
 async def prefix_hilo(ctx, bet_input: Optional[str] = None):
     """Play Hi-Lo! Guess if the next card is higher or lower (Interactive with buttons)
     
@@ -11590,7 +11590,7 @@ class PokerGameView(discord.ui.View):
         """Called when the view times out"""
         active_games.discard(self.user_id)
 
-@bot.command(name='poker')
+@bot.hybrid_command(name='poker')
 async def prefix_poker(ctx, bet_input: Optional[str] = None):
     """Play Interactive 5-Card Draw Poker!
     
@@ -11666,7 +11666,7 @@ async def prefix_poker(ctx, bet_input: Optional[str] = None):
     
     await ctx.send(embed=embed, view=view)
 
-@bot.command(name='pokermp')
+@bot.hybrid_command(name='pokermp')
 async def multiplayer_poker(ctx, action: Optional[str] = None, amount_input: Optional[str] = None):
     """Multiplayer Texas Hold'em Poker
     
@@ -11919,7 +11919,7 @@ async def multiplayer_poker(ctx, action: Optional[str] = None, amount_input: Opt
         )
         await ctx.send(embed=embed)
 
-@bot.command(name='roulettemp')
+@bot.hybrid_command(name='roulettemp')
 async def multiplayer_roulette(ctx, action: Optional[str] = None, bet_amount_input: Optional[str] = None, bet_type: Optional[str] = None):
     """Multiplayer Roulette - Multiple players bet on the same spin!
     
@@ -12127,7 +12127,7 @@ async def multiplayer_roulette(ctx, action: Optional[str] = None, bet_amount_inp
         )
         await ctx.send(embed=embed)
 
-@bot.command(name='setprefix')
+@bot.hybrid_command(name='setprefix')
 @commands.has_permissions(administrator=True)
 async def prefix_setprefix(ctx, new_prefix: str):
     """Change the bot's prefix for this server (Admin only)"""
@@ -12153,7 +12153,7 @@ async def setprefix_error(ctx, error):
         prefix = get_prefix(bot, ctx.message)
         await ctx.send(f"❌ Usage: `{prefix}setprefix <new_prefix>`")
 
-@bot.command(name='bumpreminder')
+@bot.hybrid_command(name='bumpreminder')
 @commands.has_permissions(administrator=True)
 async def setup_bump_reminder(ctx, ping_type: Optional[str] = None):
     """Setup DISBOARD bump reminders (Admin only)
@@ -12206,7 +12206,7 @@ async def setup_bump_reminder(ctx, ping_type: Optional[str] = None):
         f"When someone bumps with `/bump`, I'll automatically remind you 2 hours later!"
     )
 
-@bot.command(name='bumpinfo')
+@bot.hybrid_command(name='bumpinfo')
 async def bump_info(ctx):
     """View current bump reminder settings"""
     if not ctx.guild:
@@ -12280,7 +12280,7 @@ async def bump_info(ctx):
     
     await ctx.send(embed=embed)
 
-@bot.command(name='bumpdisable')
+@bot.hybrid_command(name='bumpdisable')
 @commands.has_permissions(administrator=True)
 async def disable_bump_reminder(ctx):
     """Disable bump reminders for this server (Admin only)"""
@@ -12299,7 +12299,7 @@ async def disable_bump_reminder(ctx):
     
     await ctx.send("✅ Bump reminders disabled for this server.")
 
-@bot.command(name='addchips')
+@bot.hybrid_command(name='addchips')
 @commands.is_owner()
 async def add_chips_command(ctx, member: discord.Member, amount: int):
     """Manually add chips to a user's balance (Owner only)
@@ -12356,7 +12356,7 @@ async def addchips_error(ctx, error):
     elif isinstance(error, commands.BadArgument):
         await ctx.send("❌ Invalid arguments! Make sure to mention a user and provide a valid number.")
 
-@bot.command(name='resetbalance')
+@bot.hybrid_command(name='resetbalance')
 @commands.is_owner()
 async def reset_balance_command(ctx, member: discord.Member, amount: int = 1000):
     """Reset a user's chip balance (Owner only)
@@ -12416,7 +12416,7 @@ async def resetbalance_error(ctx, error):
     elif isinstance(error, commands.BadArgument):
         await ctx.send("❌ Invalid arguments! Make sure to mention a user and provide a valid number.")
 
-@bot.command(name='infinite')
+@bot.hybrid_command(name='infinite')
 @commands.is_owner()
 async def infinite_chips_command(ctx, member: Optional[discord.Member] = None, amount: int = 1000):
     """Toggle infinite chips for a user (Owner only)
@@ -12489,7 +12489,7 @@ async def infinite_error(ctx, error):
     elif isinstance(error, commands.BadArgument):
         await ctx.send("❌ Invalid user! Make sure to mention a valid user.")
 
-@bot.command(name='resetdailyclaims')
+@bot.hybrid_command(name='resetdailyclaims')
 @commands.is_owner()
 async def reset_daily_claims_all(ctx):
     """Reset everyone's daily claim and notify them (Owner only)
@@ -12701,7 +12701,7 @@ async def secret_slash(interaction: discord.Interaction, code: str):
     """Claim a secret code (Slash command version)"""
     await claim_secret_code(interaction, code)
 
-@bot.command(name='secrets')
+@bot.hybrid_command(name='secrets')
 @commands.has_permissions(administrator=True)
 async def secrets_list_command(ctx):
     """View all secret codes organized by theme and rarity (Admin only)
@@ -12804,7 +12804,7 @@ async def secrets_error(ctx, error):
     if isinstance(error, commands.MissingPermissions):
         await ctx.send("❌ You need Administrator permissions to view the secret codes list!")
 
-@bot.command(name='record')
+@bot.hybrid_command(name='record')
 @commands.has_permissions(administrator=True)
 async def casino_record_command(ctx):
     """View casino profit/loss statistics (Admin only)
@@ -12935,7 +12935,7 @@ async def record_error(ctx, error):
     if isinstance(error, commands.MissingPermissions):
         await ctx.send("❌ You need Administrator permissions to view casino records!")
 
-@bot.command(name='chipslog')
+@bot.hybrid_command(name='chipslog')
 @commands.has_permissions(administrator=True)
 async def chips_log_command(ctx, lines: int = 20):
     """View recent chip transaction log (Admin only)
@@ -13024,7 +13024,7 @@ async def chipslog_error(ctx, error):
     elif isinstance(error, commands.BadArgument):
         await ctx.send("❌ Invalid number! Usage: `~chipslog [lines]`")
 
-@bot.command(name='resetclaim')
+@bot.hybrid_command(name='resetclaim')
 @commands.has_permissions(administrator=True)
 async def reset_claim_command(ctx, member: discord.Member, claim_type: str):
     """Manually reset claim timers for a user (Admin only)
@@ -13645,7 +13645,7 @@ async def send_error_to_channel(error_title: str, error_details: str, context: O
     except Exception as e:
         print(f"Failed to send error to channel: {e}")
 
-@bot.command(name='streamnotify')
+@bot.hybrid_command(name='streamnotify')
 @commands.has_permissions(manage_guild=True)
 async def stream_setup_command(ctx, action: Optional[str] = None):
     """Setup stream notifications for your server
@@ -13690,7 +13690,7 @@ async def stream_setup_command(ctx, action: Optional[str] = None):
     )
     return await ctx.send(embed=embed)
 
-@bot.command(name='twitch')
+@bot.hybrid_command(name='twitch')
 @commands.has_permissions(manage_guild=True)
 async def twitch_command(ctx, action: Optional[str] = None, username: Optional[str] = None):
     """Manage Twitch stream monitoring
@@ -13801,7 +13801,7 @@ async def twitch_command(ctx, action: Optional[str] = None, username: Optional[s
     else:
         return await ctx.send("❌ Unknown action. Use `~twitch` for help")
 
-@bot.command(name='youtube')
+@bot.hybrid_command(name='youtube')
 @commands.has_permissions(manage_guild=True)
 async def youtube_command(ctx, action: Optional[str] = None, username: Optional[str] = None):
     """Manage YouTube stream monitoring
@@ -13910,7 +13910,7 @@ async def youtube_command(ctx, action: Optional[str] = None, username: Optional[
     else:
         return await ctx.send("❌ Unknown action. Use `~youtube` for help")
 
-@bot.command(name='testchannel')
+@bot.hybrid_command(name='testchannel')
 @commands.is_owner()
 async def test_channel_command(ctx):
     """Send a test message to the error logging channel (Owner only)"""
@@ -13936,7 +13936,7 @@ async def test_channel_command(ctx):
 
 # ============= NEW SYSTEMS: QUESTS, PRESTIGE, MYSTATS, BIRTHDAY, REFER =============
 
-@bot.command(name='quests')
+@bot.hybrid_command(name='quests')
 async def quests_command(ctx):
     """View daily quests and track progress"""
     user_id = str(ctx.author.id)
@@ -13989,7 +13989,7 @@ async def quests_command(ctx):
     embed.set_footer(text=f"Completed today: {quest_data.get('completed_today', 0)}/3")
     await ctx.send(embed=embed)
 
-@bot.command(name='prestige')
+@bot.hybrid_command(name='prestige')
 async def prestige_command(ctx):
     """Reset your progress for permanent multipliers"""
     user_id = str(ctx.author.id)
@@ -14028,7 +14028,7 @@ async def prestige_command(ctx):
     
     await ctx.send(embed=embed)
 
-@bot.command(name='mystats')
+@bot.hybrid_command(name='mystats')
 async def mystats_command(ctx):
     """View your personal game statistics"""
     user_id = str(ctx.author.id)
@@ -14079,7 +14079,7 @@ async def mystats_command(ctx):
     
     await ctx.send(embed=embed)
 
-@bot.command(name='birthday')
+@bot.hybrid_command(name='birthday')
 async def birthday_command(ctx, date=None):
     """Set your birthday for annual bonus chips"""
     user_id = str(ctx.author.id)
@@ -14107,7 +14107,7 @@ async def birthday_command(ctx, date=None):
     except (ValueError, IndexError):
         await ctx.send("❌ Invalid format. Use `~birthday MM-DD` (e.g., `~birthday 03-15`)")
 
-@bot.command(name='refer')
+@bot.hybrid_command(name='refer')
 async def refer_command(ctx, action: Optional[str] = None, user: Optional[discord.User] = None):
     """Referral system - invite friends and earn bonuses"""
     user_id = str(ctx.author.id)
