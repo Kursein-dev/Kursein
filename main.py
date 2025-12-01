@@ -13186,12 +13186,22 @@ async def check_reminders():
             try:
                 # Check if this is a bump reminder or regular reminder
                 if reminder.get("type") == "bump":
-                    # Handle bump reminder
-                    channel = bot.get_channel(reminder["channel_id"])
+                    # Handle bump reminder - use CURRENT config (not stored values)
+                    guild_id = str(reminder.get("guild_id"))
                     
-                    if channel and isinstance(channel, discord.abc.Messageable):
+                    # Get current config (in case user changed channel/target)
+                    if guild_id in bump_config:
+                        current_config = bump_config[guild_id]
+                        channel = bot.get_channel(current_config["channel_id"])
+                        ping_type = current_config.get("ping_type", "user")
+                        ping_target = current_config.get("ping_target")
+                    else:
+                        # Fallback to stored values if config was removed
+                        channel = bot.get_channel(reminder["channel_id"])
                         ping_type = reminder.get("ping_type", "user")
                         ping_target = reminder.get("ping_target")
+                    
+                    if channel and isinstance(channel, discord.abc.Messageable):
                         
                         if ping_type == "role":
                             mention = f"<@&{ping_target}>"
