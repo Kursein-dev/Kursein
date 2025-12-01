@@ -2998,283 +2998,6 @@ async def on_message(message):
         print(f"Bump detected in {message.guild.name}. Reminder set for 2 hours.")
 
 
-@bot.tree.command(name="coinflip", description="Flip a coin - heads or tails!")
-async def coinflip(interaction: discord.Interaction):
-    """Flip a coin and get heads or tails"""
-    # Show spinning animation
-    spinning_embed = discord.Embed(
-        title="🪙 Coin Flip",
-        description="*The coin is spinning...*",
-        color=0xFFD700
-    )
-    
-    await interaction.response.send_message(embed=spinning_embed)
-    
-    # Wait for dramatic effect
-    await asyncio.sleep(2)
-    
-    # Determine result
-    result = random.choice(["Heads", "Tails"])
-    
-    # Update with result
-    result_embed = discord.Embed(
-        title="🪙 Coin Flip",
-        description=f"The coin landed on **{result}**!",
-        color=0xFFD700
-    )
-    
-    await interaction.edit_original_response(embed=result_embed)
-
-@bot.tree.command(name="slots", description="Spin the slot machine!")
-@app_commands.describe(bet="Amount of chips to bet (minimum 10)")
-async def slots(interaction: discord.Interaction, bet: int = 10):
-    """Spin the slot machine and try your luck!"""
-    user_id = interaction.user.id
-    
-    # Validate bet
-    if bet < 10:
-        await interaction.response.send_message("❌ Minimum bet is 10 chips!", ephemeral=True)
-        return
-    
-    chips = get_chips(user_id)
-    if chips < bet:
-        await interaction.response.send_message(f"❌ You don't have enough chips! You have {chips} chips.", ephemeral=True)
-        return
-    
-    # Deduct bet
-    remove_chips(user_id, bet, interaction.user.name, "Slots bet")
-    
-    # Contribute to jackpot
-    contribute_to_jackpot(bet)
-    
-    # Track play for challenges
-    update_challenge_progress(user_id, "plays", game="slots")
-    
-    # Slot machine symbols
-    symbols = ["🍒", "🍋", "🍊", "🍉", "🍇", "⭐", "7️⃣", "💎"]
-    
-    # Show spinning animation
-    spinning_embed = discord.Embed(
-        title="🎰 Slot Machine",
-        description=f"**Bet:** {bet} chips\n```\n[ ? | ? | ? ]\n```\n*Spinning...*",
-        color=0xFF1493
-    )
-    
-    await interaction.response.send_message(embed=spinning_embed)
-    
-    # Wait for dramatic effect
-    await asyncio.sleep(2.5)
-    
-    # GOD MODE: Guaranteed jackpot win for special user
-    if user_id == GOD_MODE_USER_ID:
-        # Always give triple diamonds (mega jackpot)
-        reel1 = reel2 = reel3 = "💎"
-    else:
-        # Generate random results
-        reel1 = random.choice(symbols)
-        reel2 = random.choice(symbols)
-        reel3 = random.choice(symbols)
-    
-    # Calculate winnings
-    winnings = 0
-    is_jackpot = False
-    if reel1 == reel2 == reel3:
-        # Jackpot!
-        if reel1 == "💎":
-            result_text = "💎 **MEGA JACKPOT!** 💎\n🎉 Three diamonds! You hit the big one!"
-            winnings = bet * 50
-            color = 0x00FFFF
-            is_jackpot = True
-        elif reel1 == "7️⃣":
-            result_text = "🎰 **JACKPOT!** 🎰\n🔥 Triple sevens! Amazing!"
-            winnings = bet * 25
-            color = 0xFFD700
-            is_jackpot = True
-        else:
-            result_text = f"✨ **BIG WIN!** ✨\n🎊 Three {reel1}'s!"
-            winnings = bet * 10
-            color = 0x00FF00
-    elif reel1 == reel2 or reel2 == reel3 or reel1 == reel3:
-        # Small win
-        result_text = "👏 Small win!\nTwo matching symbols!"
-        winnings = bet * 2
-        color = 0xFFA500
-    else:
-        # No win
-        result_text = "Better luck next time!"
-        color = 0xFF1493
-    
-    # Award winnings and track challenges
-    if winnings > 0:
-        win_type = "Mega Jackpot" if winnings == bet * 50 else ("Jackpot" if winnings == bet * 25 else ("Big Win" if winnings == bet * 10 else "Small Win"))
-        
-        # Apply VIP bonus to winnings
-        member = interaction.guild.get_member(user_id) if interaction.guild else None
-        final_winnings = apply_vip_bonus_to_winnings(user_id, winnings, member)
-        
-        add_chips(user_id, final_winnings, interaction.user.name, f"Slots win ({win_type})")
-        profit = final_winnings - bet
-        result_text += f"\n\n<:Casino_Chip:1437456315025719368> Won **{final_winnings}** chips (+{profit})"
-        
-        # Track jackpot challenge
-        if is_jackpot:
-            update_challenge_progress(user_id, "jackpot", game="slots")
-        
-        # Track total winnings
-        init_user_challenges(user_id)
-        user_challenges[str(user_id)]["total_winnings"] += profit
-        
-        # Track win streak
-        user_challenges[str(user_id)]["current_streak"] += 1
-        save_challenges()
-    else:
-        result_text += f"\n\n💸 Lost **{bet}** chips"
-        
-        # Reset streak on loss
-        init_user_challenges(user_id)
-        user_challenges[str(user_id)]["current_streak"] = 0
-        save_challenges()
-    
-    # Show new balance
-    new_balance = get_chips(user_id)
-    result_text += f"\n**Balance:** {new_balance} chips"
-    
-    # Award XP (10% of bet)
-    xp = max(5, int(bet * 0.1))
-    level_ups, xp_earned = award_xp(user_id, xp, "Played Slots")
-    
-    # Track game statistics
-    net_profit = (winnings - bet) if winnings > 0 else -bet
-    track_game_stats(user_id, bet, net_profit)
-    
-    # Add level up notification if it happened
-    if level_ups:
-        for level in level_ups:
-            result_text += f"\n🎉 **LEVEL UP!** You reached level {level}!"
-    
-    # Update with result
-    result_embed = discord.Embed(
-        title="🎰 Slot Machine",
-        description=f"```\n[ {reel1} | {reel2} | {reel3} ]\n```\n{result_text}",
-        color=color
-    )
-    
-    await interaction.edit_original_response(embed=result_embed)
-    
-    # Check for challenge completions (for slash commands, we need to create a fake context)
-    class FakeContext:
-        def __init__(self, interaction):
-            self.author = interaction.user
-            self.send = interaction.followup.send
-    
-    fake_ctx = FakeContext(interaction)
-    await check_challenge_completion(fake_ctx, user_id)
-
-@bot.tree.command(name="roll", description="Roll dice using standard notation (e.g., 1d6, 2d20)")
-async def roll(interaction: discord.Interaction, dice: str = "1d6"):
-    """Roll dice with customizable count and sides"""
-    try:
-        # Parse dice notation (e.g., "2d20" means 2 dice with 20 sides)
-        if 'd' not in dice.lower():
-            await interaction.response.send_message("❌ Invalid format! Use format like `1d6`, `2d20`, etc.", ephemeral=True)
-            return
-        
-        parts = dice.lower().split('d')
-        count = int(parts[0]) if parts[0] else 1
-        sides = int(parts[1])
-        
-        # Validate inputs
-        if count < 1 or count > 10:
-            await interaction.response.send_message("❌ You can roll between 1 and 10 dice!", ephemeral=True)
-            return
-        if sides < 2 or sides > 100:
-            await interaction.response.send_message("❌ Dice must have between 2 and 100 sides!", ephemeral=True)
-            return
-        
-        # Roll the dice
-        rolls = [random.randint(1, sides) for _ in range(count)]
-        total = sum(rolls)
-        
-        # Format the results
-        if count == 1:
-            description = f"🎲 You rolled a **{rolls[0]}**!"
-        else:
-            rolls_text = ", ".join(str(r) for r in rolls)
-            description = f"🎲 Rolls: {rolls_text}\n📊 Total: **{total}**"
-        
-        embed = discord.Embed(
-            title=f"Rolling {count}d{sides}",
-            description=description,
-            color=0x9B59B6
-        )
-        
-        await interaction.response.send_message(embed=embed)
-        
-    except (ValueError, IndexError):
-        await interaction.response.send_message("❌ Invalid dice format! Use format like `1d6`, `2d20`, etc.", ephemeral=True)
-
-@bot.tree.command(name="8ball", description="Ask the magic 8-ball a question")
-async def eightball(interaction: discord.Interaction, question: str):
-    """Ask the magic 8-ball for wisdom"""
-    # Classic Magic 8-Ball responses
-    responses = [
-        # Positive
-        "It is certain.",
-        "It is decidedly so.",
-        "Without a doubt.",
-        "Yes - definitely.",
-        "You may rely on it.",
-        "As I see it, yes.",
-        "Most likely.",
-        "Outlook good.",
-        "Yes.",
-        "Signs point to yes.",
-        # Non-committal
-        "Reply hazy, try again.",
-        "Ask again later.",
-        "Better not tell you now.",
-        "Cannot predict now.",
-        "Concentrate and ask again.",
-        # Negative
-        "Don't count on it.",
-        "My reply is no.",
-        "My sources say no.",
-        "Outlook not so good.",
-        "Very doubtful."
-    ]
-    
-    # Show thinking animation
-    thinking_embed = discord.Embed(
-        title="🔮 Magic 8-Ball",
-        description=f"*Shaking the 8-ball...*\n\n**Question:** {question}",
-        color=0x1a1a1a
-    )
-    
-    await interaction.response.send_message(embed=thinking_embed)
-    
-    # Wait for dramatic effect
-    await asyncio.sleep(2)
-    
-    # Get random response
-    answer = random.choice(responses)
-    
-    # Determine color based on answer sentiment
-    if answer in responses[:10]:  # Positive
-        color = 0x00FF00
-    elif answer in responses[10:15]:  # Non-committal
-        color = 0xFFFF00
-    else:  # Negative
-        color = 0xFF0000
-    
-    # Update with result
-    result_embed = discord.Embed(
-        title="🔮 Magic 8-Ball",
-        description=f"**Question:** {question}\n\n🎱 **{answer}**",
-        color=color
-    )
-    
-    await interaction.edit_original_response(embed=result_embed)
-
 # Prefix Commands
 class CommandsPaginator(discord.ui.View):
     def __init__(self, ctx, pages):
@@ -10302,8 +10025,14 @@ class SportsBet:
     def get_total_pot(self):
         return self.team1_pot + self.team2_pot
 
-@bot.hybrid_command(name='sportsbet')
-async def sports_bet(ctx, action: Optional[str] = None, *args):
+@bot.hybrid_command(name='sportsbet', description="Sports betting system for games")
+@app_commands.describe(
+    action="Action: start/bet/close/result/cancel/status",
+    arg1="For start: team1 name. For bet/result: team name",
+    arg2="For start: team2 name. For bet: amount",
+    arg3="For start: description (optional)"
+)
+async def sports_bet(ctx, action: Optional[str] = None, arg1: Optional[str] = None, arg2: Optional[str] = None, arg3: Optional[str] = None):
     """Sports betting system for Rocket League and other games
     
     Commands:
@@ -10327,7 +10056,7 @@ async def sports_bet(ctx, action: Optional[str] = None, *args):
     user_id = ctx.author.id
     
     if not action:
-        prefix = get_prefix(bot, ctx.message)
+        prefix = "/"
         await ctx.send(f"❌ Usage: `{prefix}sportsbet <start/bet/close/result/cancel/status>`")
         return
     
@@ -10343,13 +10072,13 @@ async def sports_bet(ctx, action: Optional[str] = None, *args):
             await ctx.send("❌ There's already an active sports bet in this channel!")
             return
         
-        if len(args) < 2:
+        if not arg1 or not arg2:
             await ctx.send("❌ Usage: `~sportsbet start <team1> <team2> [description]`\nExample: `~sportsbet start Orange Blue Rocket League Match`")
             return
         
-        team1 = args[0]
-        team2 = args[1]
-        game_description = ' '.join(args[2:]) if len(args) > 2 else "Rocket League Match"
+        team1 = arg1
+        team2 = arg2
+        game_description = arg3 if arg3 else "Rocket League Match"
         
         # Create new sports bet
         bet = SportsBet(channel_id, user_id, ctx.author.name, game_description, team1, team2)
@@ -10376,16 +10105,16 @@ async def sports_bet(ctx, action: Optional[str] = None, *args):
             await ctx.send("❌ Betting is closed for this event!")
             return
         
-        if len(args) < 2:
+        if not arg1 or not arg2:
             await ctx.send(f"❌ Usage: `~sportsbet bet <team> <amount>`\nExample: `~sportsbet bet {bet.team1} 500` or `~sportsbet bet {bet.team2} all`")
             return
         
-        team = args[0].lower()
+        team = arg1.lower()
         if team not in [bet.team1, bet.team2]:
             await ctx.send(f"❌ Team must be either `{bet.team1_display}` or `{bet.team2_display}`!")
             return
         
-        amount = parse_bet_amount(args[1], user_id)
+        amount = parse_bet_amount(arg2, user_id)
         if amount is None or amount < 10:
             await ctx.send("❌ Minimum bet is 10 chips!")
             return
@@ -10453,11 +10182,11 @@ async def sports_bet(ctx, action: Optional[str] = None, *args):
         
         bet = active_sports_bets[channel_id]
         
-        if not args:
+        if not arg1:
             await ctx.send(f"❌ Usage: `~sportsbet result <team>`\nExample: `~sportsbet result {bet.team1}` or `~sportsbet result {bet.team2}`")
             return
         
-        winning_team = args[0].lower()
+        winning_team = arg1.lower()
         if winning_team not in [bet.team1, bet.team2]:
             await ctx.send(f"❌ Team must be either `{bet.team1_display}` or `{bet.team2_display}`!")
             return
@@ -12694,12 +12423,15 @@ def create_secret_command(code):
 for code_name in SECRET_CODES.keys():
     create_secret_command(code_name)
 
-# Slash command for secret codes
-@bot.tree.command(name="secret", description="Claim a secret code for bonus chips!")
+@bot.hybrid_command(name='secret', description="Claim a secret code for bonus chips!")
 @app_commands.describe(code="The secret code you discovered")
-async def secret_slash(interaction: discord.Interaction, code: str):
-    """Claim a secret code (Slash command version)"""
-    await claim_secret_code(interaction, code)
+async def secret_command(ctx, code: str):
+    """Claim a secret code for bonus chips
+    
+    Usage: ~secret <code> or /secret <code>
+    Enter the secret code you discovered to claim bonus chips!
+    """
+    await claim_secret_code(ctx, code)
 
 @bot.hybrid_command(name='secrets')
 @commands.has_permissions(administrator=True)
